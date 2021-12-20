@@ -15,7 +15,7 @@ public class ParamConfig {
         // 6: influx data sink pwd
     private String influx_pwd;
         // 7: influx data sink database
-    private String influx_dadtabase;
+    private String influx_database;
         // 8: influx data sink organization
     private String influx_organization;
         // 9: influx data buffer size
@@ -56,7 +56,7 @@ public class ParamConfig {
         // 6: influx data sink pwd
         this.influx_pwd = "k8s123";
         // 7: influx data sink database
-        this.influx_dadtabase = "jaeger";
+        this.influx_database = "jaeger";
         // 8: influx data sink organization
         this.influx_organization = "influxdata";
         // 9: influx data buffer size
@@ -108,7 +108,7 @@ public class ParamConfig {
     }
 
     public String getInflux_dadtabase() {
-        return this.influx_dadtabase;
+        return this.influx_database;
     }
 
     public String getKafka_ip() {
@@ -164,7 +164,7 @@ public class ParamConfig {
     }
 
     public void setInflux_dadtabase(String influx_dadtabase) {
-        this.influx_dadtabase = influx_dadtabase;
+        this.influx_database = influx_dadtabase;
     }
 
     public void setInflux_buffer(int influx_buffer) {

@@ -8,31 +8,32 @@ public class MySource implements SourceFunction<String> {
     private long count = 0L;
     private boolean isRunning = true;
     private ArrayList<JSONObject> examples = new ArrayList<>();
-//    {"traceID": "07ee4f006c3cc562",
-//    "spanID": "242d4a802b9eb2ce",
-//    "flags": 1,
-//    "operationName": "/search.Search/Nearby",
-//    "references": [
-//      {"refType": "CHILD_OF", "traceID": "07ee4f006c3cc562", "spanID": "67263f65c08da1f1"}
+//    {
+//      "traceID": "07ee4f006c3cc562",
+//      "spanID": "242d4a802b9eb2ce",
+//      "flags": 1,
+//      "operationName": "/search.Search/Nearby",
+//      "references": [
+//          {"refType": "CHILD_OF", "traceID": "07ee4f006c3cc562", "spanID": "67263f65c08da1f1"}
 //      ],
 //      "startTime": 1633607526581551,
 //      "startTimeMillis": 1633607526581,
 //      "duration": 618,
 //      "tags": [
-//      {"key": "span.kind", "type": "string", "value": "server"}, component
-//      {"key": "component", "type": "string", "value": "gRPC"},
-//      {"key": "internal.span.format", "type": "string", "value": "proto"}
+//          {"key": "span.kind", "type": "string", "value": "server"}, component
+//          {"key": "component", "type": "string", "value": "gRPC"},
+//          {"key": "internal.span.format", "type": "string", "value": "proto"}
 //      ],
 //      "logs": [],
 //      "process": {
-//      "serviceName": "search",
-//      "tags": [
-//      {"key": "jaeger.version", "type": "string", "value": "Go-2.11.2"},
-//      {"key": "hostname", "type": "string", "value": "search-6488494995-ktm47"},
-//      {"key": "ip", "type": "string", "value": "10.64.0.27"}
-//      ]
+//          "serviceName": "search",
+//          "tags": [
+//              {"key": "jaeger.version", "type": "string", "value": "Go-2.11.2"},
+//              {"key": "hostname", "type": "string", "value": "search-6488494995-ktm47"},
+//              {"key": "ip", "type": "string", "value": "10.64.0.27"}
+//          ]
 //      }
-//      }
+//    }
 //{"traceID": "07ee4f006c3cc562", "spanID": "3bd72513072bc36b", "flags": 1, "operationName": "/geo.Geo/Nearby", "references": [{"refType": "CHILD_OF", "traceID": "07ee4f006c3cc562", "spanID": "242d4a802b9eb2ce"}], "startTime": 1633607526581555, "startTimeMillis": 1633607526581, "duration": 400, "tags": [{"key": "span.kind", "type": "string", "value": "client"}, {"key": "component", "type": "string", "value": "gRPC"}, {"key": "internal.span.format", "type": "string", "value": "proto"}], "logs": [], "process": {"serviceName": "search", "tags": [{"key": "jaeger.version", "type": "string", "value": "Go-2.11.2"}, {"key": "hostname", "type": "string", "value": "search-6488494995-ktm47"}, {"key": "ip", "type": "string", "value": "10.64.0.27"}]}}
 //{"traceID": "18247c2cdf616b3a", "spanID": "71bf320f19da2fc2", "flags": 1, "operationName": "/profile.Profile/GetProfiles", "references": [{"refType": "CHILD_OF", "traceID": "18247c2cdf616b3a", "spanID": "7da5f894f42c9459"}], "startTime": 1633607526581622, "startTimeMillis": 1633607526581, "duration": 1, "tags": [{"key": "span.kind", "type": "string", "value": "server"}, {"key": "component", "type": "string", "value": "gRPC"}, {"key": "internal.span.format", "type": "string", "value": "proto"}], "logs": [], "process": {"serviceName": "profile", "tags": [{"key": "jaeger.version", "type": "string", "value": "Go-2.11.2"}, {"key": "hostname", "type": "string", "value": "profile-5c7445749d-nn8k8"}, {"key": "ip", "type": "string", "value": "10.64.0.26"}]}}
 //{"traceID": "197bbc0205347589", "spanID": "62074ffaf64983ae", "flags": 1, "operationName": "/search.Search/Nearby", "references": [{"refType": "CHILD_OF", "traceID": "197bbc0205347589", "spanID": "2664161d681e867a"}], "startTime": 1633607526581629, "startTimeMillis": 1633607526581, "duration": 727, "tags": [{"key": "span.kind", "type": "string", "value": "server"}, {"key": "component", "type": "string", "value": "gRPC"}, {"key": "internal.span.format", "type": "string", "value": "proto"}], "logs": [], "process": {"serviceName": "search", "tags": [{"key": "jaeger.version", "type": "string", "value": "Go-2.11.2"}, {"key": "hostname", "type": "string", "value": "search-6488494995-ktm47"}, {"key": "ip", "type": "string", "value": "10.64.0.27"}]}}

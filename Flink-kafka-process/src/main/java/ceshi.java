@@ -1,3 +1,4 @@
+import org.apache.flink.api.java.tuple.Tuple9;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +10,9 @@ public class ceshi {
         JsonNode arrNode = new ObjectMapper().readTree(json).get("references");
         System.out.println(arrNode.isArray());
         System.out.println(arrNode.get(0).get("spanID").asText().trim());
+
+        Tuple9<String, String, String, String, Long, Long, String, String, String> s=new Tuple9<>();
+
     }
 
 }

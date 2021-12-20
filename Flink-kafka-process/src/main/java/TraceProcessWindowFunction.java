@@ -26,8 +26,8 @@ public class TraceProcessWindowFunction extends ProcessWindowFunction<Tuple9<Str
         for (long dur : DurList){
             std += (dur - mean)*(dur-mean);
         }
-        std = Math.sqrt(std);
         std = std / count;
+        std = Math.sqrt(std);
         double mindur = (double)DurList.get(0);
         double maxdur = (double)DurList.get(DurList.size()-1);
         //P50
