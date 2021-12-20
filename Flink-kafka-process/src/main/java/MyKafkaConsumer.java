@@ -30,105 +30,105 @@ public class MyKafkaConsumer {
 //        String topic = args[1].trim();
         // args:
         // build a class ParamConfig for these parameters:
-        HashMap<String, String> extract_args = new HashMap<>();
-        for (String arg : args) {
-            String[] arg_split = arg.split("=", 2);
-            extract_args.put(arg_split[0].trim(), arg_split[1].trim());
+        HashMap<String,String> extract_args = new HashMap<>();
+        for (String arg : args){
+            String[] arg_split = arg.split("=",2);
+            extract_args.put(arg_split[0].trim(),arg_split[1].trim());
         }
         ParamConfig paramConfig = new ParamConfig();
         // 0: kafka data source ip
-        if (extract_args.containsKey("kafka.ip".trim())) {
+        if (extract_args.containsKey("kafka.ip".trim())){
             paramConfig.setKafka_ip(extract_args.get("kafka.ip"));
         }
         // 1: kafka data source port
-        if (extract_args.containsKey("kafka.port".trim())) {
+        if (extract_args.containsKey("kafka.port".trim())){
             paramConfig.setKafka_port(Integer.parseInt(extract_args.get("kafka.port")));
         }
         // 2: kafka data topic
-        if (extract_args.containsKey("kafka.topic".trim())) {
+         if (extract_args.containsKey("kafka.topic".trim())){
             paramConfig.setKafka_topic(extract_args.get("kafka.topic"));
         }
         // 3:influx data sink ip
-        if (extract_args.containsKey("influx.ip".trim())) {
+        if (extract_args.containsKey("influx.ip".trim())){
             paramConfig.setInflux_ip(extract_args.get("influx.ip"));
         }
         // 4:influx data sink port
-        if (extract_args.containsKey("influx.port".trim())) {
+        if (extract_args.containsKey("influx.port".trim())){
             paramConfig.setInflux_port(Integer.parseInt(extract_args.get("influx.port")));
         }
         // 5: influx data sink user
-        if (extract_args.containsKey("influx.user".trim())) {
+        if (extract_args.containsKey("influx.user".trim())){
             paramConfig.setInflux_user(extract_args.get("influx.user"));
         }
         // 6: influx data sink pwd
-        if (extract_args.containsKey("influx.pwd".trim())) {
+        if (extract_args.containsKey("influx.pwd".trim())){
             paramConfig.setInflux_pwd(extract_args.get("influx.pwd"));
         }
         // 7: influx data sink database
-        if (extract_args.containsKey("influx.database".trim())) {
+        if (extract_args.containsKey("influx.database".trim())){
             paramConfig.setInflux_dadtabase(extract_args.get("influx.database"));
         }
         // 8: influx data sink organization
-        if (extract_args.containsKey("influx.organization".trim())) {
+         if (extract_args.containsKey("influx.organization".trim())){
             paramConfig.setInflux_organization(extract_args.get("influx.organization"));
         }
         // 9: influx data buffer size
-        if (extract_args.containsKey("influx.buffer".trim())) {
+         if (extract_args.containsKey("influx.buffer".trim())){
             paramConfig.setInflux_buffer(Integer.parseInt(extract_args.get("influx.buffer")));
         }
         // 10: mongo TRANSACTION_ENABLED
-        if (extract_args.containsKey("mongo.trans.enable".trim())) {
+        if (extract_args.containsKey("mongo.trans.enable".trim())){
             paramConfig.setMongo_trans_enable(extract_args.get("mongo.trans.enable"));
         }
         // 11: mongo FLUSH_ON_CHECKPOINT
-        if (extract_args.containsKey("mongo.flush.checkpoint".trim())) {
+        if (extract_args.containsKey("mongo.flush.checkpoint".trim())){
             paramConfig.setMongo_flush_checkpoint(extract_args.get("mongo.flush.checkpoint"));
         }
         // 12: mongo FLUSH_SIZE
-        if (extract_args.containsKey("mongo.flush.size".trim())) {
+        if (extract_args.containsKey("mongo.flush.size".trim())){
             paramConfig.setMongo_flush_size(Long.parseLong(extract_args.get("mongo.flush.size")));
         }
         // 13: mongo FLUSH_INTERVAL
-        if (extract_args.containsKey("mongo.flush.interval".trim())) {
+        if (extract_args.containsKey("mongo.flush.interval".trim())){
             paramConfig.setMongo_flush_interval(Long.parseLong(extract_args.get("mongo.flush.interval")));
         }
         // 14: mongo user
-        if (extract_args.containsKey("mongo.user".trim())) {
+        if (extract_args.containsKey("mongo.user".trim())){
             paramConfig.setMongo_user(extract_args.get("mongo.user"));
         }
         // 15: mongo pwd
-        if (extract_args.containsKey("mongo.pwd".trim())) {
+        if (extract_args.containsKey("mongo.pwd".trim())){
             paramConfig.setMongo_pwd(extract_args.get("mongo.pwd"));
         }
         // 16: mongo ip
-        if (extract_args.containsKey("mongo.ip".trim())) {
+        if (extract_args.containsKey("mongo.ip".trim())){
             paramConfig.setMongo_ip(extract_args.get("mongo.ip"));
         }
         // 17: mongo port
-        if (extract_args.containsKey("mongo.port".trim())) {
+         if (extract_args.containsKey("mongo.port".trim())){
             paramConfig.setMongo_port(Integer.parseInt(extract_args.get("mongo.port")));
         }
         // 18: mongo database
-        if (extract_args.containsKey("mongo.database".trim())) {
+        if (extract_args.containsKey("mongo.database".trim())){
             paramConfig.setMongo_database(extract_args.get("mongo.database"));
         }
         // 19: mongo collection
-        if (extract_args.containsKey("mongo.collection".trim())) {
+         if (extract_args.containsKey("mongo.collection".trim())){
             paramConfig.setMongo_collection(extract_args.get("mongo.collection"));
         }
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         InfluxDBSink<QPSs> influxDBSink = InfluxDBSink.builder()
-                .setInfluxDBSchemaSerializer(new QPSInfluxSerializer())
-                .setInfluxDBUrl("http://" + paramConfig.getInflux_ip() + ":" + paramConfig.getInflux_port())           // http://localhost:8086
-                .setInfluxDBUsername(paramConfig.getInflux_user()) // admin
+        .setInfluxDBSchemaSerializer(new QPSInfluxSerializer())
+        .setInfluxDBUrl("http://"+paramConfig.getInflux_ip()+":"+paramConfig.getInflux_port())           // http://localhost:8086
+        .setInfluxDBUsername(paramConfig.getInflux_user()) // admin
 //                CREATE USER k8s with PASSWORD 'k8s123'
-                .setInfluxDBPassword(paramConfig.getInflux_pwd()) // admin
-                .setInfluxDBBucket(paramConfig.getInflux_dadtabase())     // default
+        .setInfluxDBPassword(paramConfig.getInflux_pwd()) // admin
+        .setInfluxDBBucket(paramConfig.getInflux_dadtabase())     // default
                 .setWriteBufferSize(paramConfig.getInflux_buffer())
-                .setInfluxDBOrganization(paramConfig.getInflux_organization())  // influxdata
+        .setInfluxDBOrganization(paramConfig.getInflux_organization())  // influxdata
                 .setInfluxDBVersion(1)
-                .build();
+        .build();
 
         Properties mongoproperties = new Properties();
         mongoproperties.setProperty(MongoOptions.SINK_TRANSACTION_ENABLED, paramConfig.getMongo_trans_enable());
@@ -136,111 +136,110 @@ public class MyKafkaConsumer {
         mongoproperties.setProperty(MongoOptions.SINK_FLUSH_SIZE, String.valueOf(paramConfig.getMongo_flush_size()));
         mongoproperties.setProperty(MongoOptions.SINK_FLUSH_INTERVAL, String.valueOf(paramConfig.getMongo_flush_interval()));
 //        DataStreamSource<Spans> dataStreamSource = env.addSource(new MySpanSource() );
-        MongoSink<Spans> mongoSink = new MongoSink<>("mongodb://" + paramConfig.getMongo_user() + ":" + paramConfig.getMongo_pwd() + "@" + paramConfig.getMongo_ip() + ":" + paramConfig.getMongo_port(), paramConfig.getMongo_database(), paramConfig.getMongo_collection(),
-                new SpansDocumentSerializer(), mongoproperties);
+        MongoSink<Spans> mongoSink = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), paramConfig.getMongo_collection(),
+                               new SpansDocumentSerializer(), mongoproperties);
 //        dataStreamSource.sinkTo();
 
         Properties properties = new Properties();
 //        "10.100.233.199:9092"
 //        properties.setProperty("bootstrap.servers",kafkaserver);
-        properties.setProperty("bootstrap.servers", paramConfig.getKafka_ip() + ":" + paramConfig.getKafka_port());
+        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
         System.out.println("start the consumer");
 
-        FlinkKafkaConsumer<ObjectNode> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(), new JSONKeyValueDeserializationSchema(true), properties);
+        FlinkKafkaConsumer<ObjectNode> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(),new JSONKeyValueDeserializationSchema(true),properties);
         consumer.setStartFromGroupOffsets();
         DataStream<ObjectNode> streamSource = env.addSource(consumer);
 //        DataStream<ObjectNode> streamSource = env.addSource(new MySource());
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        DataStream<Tuple9<String, String, String, String, Long, Long, String, String, String>> sourcecsv =
-                streamSource.process(new ProcessFunction<ObjectNode, Tuple9<String, String, String, String, Long, Long, String, String, String>>() {
-                                         @Override
-                                         public void processElement(ObjectNode value, Context ctx, Collector<Tuple9<String, String, String, String, Long, Long, String, String, String>> out) throws Exception {
-                                             String tid = value.get("value").get("traceID").asText().trim();
-                                             String sid = value.get("value").get("spanID").asText().trim();
-                                             String operationName = value.get("value").get("operationName").asText().trim();
-                                             long startTimeMillis = value.get("value").get("startTimeMillis").asLong();
-                                             long duration = value.get("value").get("duration").asLong();
-
-                                             // Try to get 'protocal' in 'tags.component'
-                                             String protocol = "";
-                                             JsonNode spantags = value.get("value").get("tags");
-                                             for (Iterator<JsonNode> elements = spantags.elements(); elements.hasNext(); ) {
-                                                 JsonNode next = elements.next();
-                                                 String aim = next.get("key").asText().trim();
-                                                 if (aim.equals("component")) {
-                                                     // System.out.println(jtag);
-                                                     protocol = next.get("value").asText().trim();
-                                                     break;
-                                                 }
-                                             }
-
-                                             JsonNode process = value.get("value").get("process");
-                                             String serviceName = process.get("serviceName").asText().trim();
-                                             String pod = ""; // hostname
-                                             String endpoint = ""; // ip
-                                             // If 'process' has 'tags', try to get 'hostname' and 'ip' in 'process.tags'
-                                             if (process.has("tags")) {
-                                                 JsonNode tags = process.get("tags");
-                                                 for (Iterator<JsonNode> elements = tags.elements(); elements.hasNext(); ) {
-                                                     JsonNode next = elements.next();
-                                                     String aim = next.get("key").asText().trim();
-                                                     if (aim.equals("hostname")) {
-                                                         // System.out.println(jtag);
-                                                         pod = next.get("value").asText();
-                                                         // break;
-                                                     }
-                                                     if (aim.trim().equals("ip")) {
-                                                         endpoint = next.get("value").asText();
-                                                     }
-                                                     if ((!endpoint.isEmpty()) && (!pod.isEmpty())) {
-                                                         break;
-                                                     }
-                                                 }
-                                             }
-
-                                             String refer = "0";
-                                             boolean childs = false;
-                                             String outapi = "";
+        DataStream<Tuple9<String,String,String,String,Long,Long,String,String,String>> sourcecsv =
+        streamSource.process(new ProcessFunction<ObjectNode, Tuple9<String,String,String,String,Long,Long,String,String,String>>() {
+            @Override
+            public void processElement(ObjectNode value, Context ctx, Collector<Tuple9<String,String,String,String,Long,Long,String,String,String>> out) throws Exception {
+                String tid = value.get("value").get("traceID").asText().trim();
+                String sid = value.get("value").get("spanID").asText().trim();
+                long dur = value.get("value").get("duration").asLong();
+                JsonNode process = value.get("value").get("process");
+                String service = process.get("serviceName").asText().trim();
+                String pod = "";
+                String endpoint = "";
+                String protocol = "";
+//                component
+                if (process.has("tags")) {
+                    JsonNode tags = process.get("tags");
+                    for (Iterator<JsonNode> elements = tags.elements(); elements.hasNext();){
+                        JsonNode next = elements.next();
+                        String aim = next.get("key").asText().trim();
+                        if (aim.trim().equals("hostname")){
+//                    System.out.println(jtag);
+                            pod = next.get("value").asText();
+//                    break;
+                        }
+                        if (aim.trim().equals("ip")){
+                            endpoint = next.get("value").asText();
+                        }
+                        if ((!endpoint.isEmpty()) && (!pod.isEmpty())){
+                            break;
+                        }
+                    }
+                }
+                JsonNode spantags = value.get("value").get("tags");
+                for(Iterator<JsonNode> elements = spantags.elements();elements.hasNext();){
+                    JsonNode next = elements.next();
+                    String aim = next.get("key").asText().trim();
+                    if (aim.trim().equals("component")){
+//                System.out.println(jtag);
+                        protocol = next.get("value").asText().trim();
+                        break;
+                    }
+                }
+                long starttime = value.get("value").get("startTimeMillis").asLong();
+                String operation = value.get("value").get("operationName").asText().trim();
+                String refer = "0";
+                boolean childs = false;
+                String outapi = "";
 //                object.getJSONArray("references").isEmpty()== false
-                                             if (value.get("value").get("references").isEmpty() == false) {
-                                                 refer = value.get("value").get("references").get(0).get("spanID").asText().trim();
-                                                 childs = true;
-                                             }
-                                             // 不处理这3种服务
-                                             if (!(serviceName.equals("simple-streaming.jaeger")) && !(serviceName.contains("jaeger")) && !(serviceName.contains("simple-streaming"))) {
-                                                 operationName = operationName.replace('/', '-');
-                                                 if (operationName.charAt(0) != '-') {
-                                                     operationName = "-" + operationName.trim();
-                                                 }
-                                                 if (!childs) { // 不是子trace
-                                                     outapi = "http".trim();
-                                                 } else { // 是子trace
-                                                     outapi = serviceName.trim() + operationName;
-                                                 }
+                if (value.get("value").get("references").isEmpty() == false){
+//                    value.get("value").get("references").
+                    refer = value.get("value").get("references").get(0).get("spanID").asText().trim();
+                    childs = true;
+                }
+              if(!(service.equals("simple-streaming.jaeger")) && !(service.contains("jaeger"))&& !(service.contains("simple-streaming"))){
+                    operation = operation.replace('/','-');
+                    if (operation.charAt(0) != '-'){
+                        operation = "-"+operation.trim();
+                    }
+                    if (!childs){
+                        outapi = "http".trim();
+                    }else{
+                        outapi = service.trim()+operation;
+                    }
 //                System.out.println("trace: "+tid);
 //                System.out.println("span: "+sid);
-//                System.out.println("duration: "+duration);
-//                serviceName,operationName
-                                                 out.collect(new Tuple9<>(tid, sid, refer, outapi, startTimeMillis, duration, pod, endpoint, protocol));
-                                             }
-                                         } // End: processElement
-                                     } // End: ProcessFunction
-                ); // End: streamSource.process
+//                System.out.println("duration: "+dur);
+//                service,operation
+                    out.collect(new Tuple9<>(tid,sid,refer,outapi,starttime,dur,pod,endpoint,protocol));
 
-        SingleOutputStreamOperator<Tuple9<String, String, String, String, Long, Long, String, String, String>> source1 = sourcecsv.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Tuple9<String, String, String, String, Long, Long, String, String, String>>(Time.milliseconds(1000)) {
+                }
+
+            }
+        }
+
+        );
+        SingleOutputStreamOperator<Tuple9<String, String, String, String, Long, Long, String, String, String>> source1 =  sourcecsv.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Tuple9<String, String, String, String, Long, Long, String, String, String>>(Time.milliseconds(1000)) {
             @Override
             public long extractTimestamp(Tuple9<String, String, String, String, Long, Long, String, String, String> trace) {
                 return trace.f4;
             }
         });
-
+//Tuple10<String,Double,Double,Double,Double,Double,Double,Double,Long,Long>
         DataStream<QPSs> out1 = source1
-                .keyBy(t -> t.f3)
-                .timeWindow(Time.milliseconds(30 * 1000)).process(new TraceProcessWindowFunction());
+                .keyBy(t->t.f3)
+                .timeWindow(Time.milliseconds(30*1000)).process(new TraceProcessWindowFunction());
 
-        DataStream<Spans> out2 = source1.keyBy(t -> t.f0).timeWindow(Time.milliseconds(30 * 1000)).process(new GraphProcessWindowFunction());
-        out2.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Spans>(Time.milliseconds(1000)) {
+
+        DataStream<Spans> out2 = source1.keyBy(t->t.f0).timeWindow(Time.milliseconds(30*1000)).process(new GraphProcessWindowFunction());
+        DataStream<Spans> out3 = out2.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Spans>(Time.milliseconds(1000)) {
             @Override
             public long extractTimestamp(Spans spans) {
                 return spans.timestamp;
@@ -248,12 +247,14 @@ public class MyKafkaConsumer {
         }).keyBy(new KeySelector<Spans, String>() {
             @Override
             public String getKey(Spans spans) throws Exception {
-                return (spans.parent.trim() + ";" + spans.api.trim());
+//                return null;
+                return (spans.parent.trim()+";"+spans.api.trim()).trim();
             }
-        }).timeWindow(Time.milliseconds(60 * 1000)).process(new GraphAggProcessWindowFunction());
+        }).timeWindow(Time.milliseconds(60*1000)).process(new GraphAggProcessWindowFunction());
         out1.sinkTo(influxDBSink);
-        out2.sinkTo(mongoSink);
+        out3.sinkTo(mongoSink);
 
+//
 //        out1.print();
 //        DataStream<Tuple10<String,Double,Double,Double,Double,Double,Double,Double,Long,Long>> out1 =
         env.execute();
