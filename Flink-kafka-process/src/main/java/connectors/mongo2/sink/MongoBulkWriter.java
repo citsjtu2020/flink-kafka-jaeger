@@ -1,14 +1,14 @@
-package connectors.mongo.sink;
+package connectors.mongo2.sink;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 
-import connectors.mongo.config.SinkConfiguration;
-import connectors.mongo.internal.connection.MongoClientProvider;
-import connectors.mongo.serde.DocumentSerializer;
 import org.apache.flink.api.connector.sink.SinkWriter;
 import org.apache.flink.runtime.util.ExecutorThreadFactory;
 import org.bson.Document;
+import connectors.mongo2.config.SinkConfiguration;
+import connectors.mongo2.internal.connection.MongoClientProvider;
+import connectors.mongo2.serde.DocumentSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,26 +22,41 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-/*
-* Writer for MongoDB sink.
-* */
+
+/**
+ * Writer for MongoDB sink.
+ **/
 public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, DocumentBulk> {
+
     private final MongoClientProvider collectionProvider;
+
     private transient MongoCollection<Document> collection;
+
     private DocumentBulk currentBulk;
+
     private final List<DocumentBulk> pendingBulks = new ArrayList<>();
+
     private DocumentSerializer<IN> serializer;
+
     private transient ScheduledExecutorService scheduler;
+
     private transient ScheduledFuture scheduledFuture;
+
     private transient volatile Exception flushException;
+
     private final long maxSize;
+
     private final boolean flushOnCheckpoint;
+
     private final RetryPolicy retryPolicy = new RetryPolicy(3, 1000L);
+
     private transient volatile boolean closed = false;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoBulkWriter.class);
+
     public MongoBulkWriter(MongoClientProvider collectionProvider,
                            DocumentSerializer<IN> serializer,
-                           SinkConfiguration configuration){
+                           SinkConfiguration configuration) {
         this.collectionProvider = collectionProvider;
         this.serializer = serializer;
         this.maxSize = configuration.getBulkFlushSize();
@@ -59,7 +74,6 @@ public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, Documen
                                         try {
                                             rollBulkIfNeeded(true);
                                             flush();
-                                            flushException = null;
                                         } catch (Exception e) {
                                             flushException = e;
                                         }
@@ -69,6 +83,16 @@ public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, Documen
                             configuration.getBulkFlushInterval(),
                             configuration.getBulkFlushInterval(),
                             TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void initializeState(List<DocumentBulk> recoveredBulks) {
+        collection = collectionProvider.getDefaultCollection();
+        for (DocumentBulk bulk: recoveredBulks) {
+            for (Document document: bulk.getDocuments()) {
+                rollBulkIfNeeded();
+                currentBulk.add(document);
+            }
         }
     }
 
@@ -124,31 +148,23 @@ public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, Documen
                 do {
                     try {
                         // ordered, non-bypass mode
-//                        System.out.println(bulk.getDocuments());
-                        collection.insertMany(bulk.getDocuments());
+                        System.out.println(bulk.getDocuments());
+                        if (bulk.getDocuments().size() > 0){
+                            collection.insertMany(bulk.getDocuments());
+                        }
                         iterator.remove();
+//                       斯特e
                         break;
-                    } catch (Exception e) {
+                    } catch (MongoException e) {
                         // maybe partial failure
-                        System.out.println("data to insert: "+bulk.getDocuments());
-                        LOGGER.error("Failed to flush data to MongoDB:"+bulk.getDocuments(), e);
+                        LOGGER.error("Failed to flush data to MongoDB", e);
                     }
                 } while (!closed && retryPolicy.shouldBackoffRetry());
             }
         }
     }
 
-    public void initializeState(List<DocumentBulk> recoveredBulks) {
-        collection = collectionProvider.getDefaultCollection();
-        for (DocumentBulk bulk: recoveredBulks) {
-            for (Document document: bulk.getDocuments()) {
-                rollBulkIfNeeded();
-                currentBulk.add(document);
-            }
-        }
-    }
-
-     private void ensureConnection() {
+    private void ensureConnection() {
         try {
             collection.listIndexes();
         } catch (MongoException e) {
@@ -170,7 +186,6 @@ public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, Documen
 
     private void checkFlushException() throws IOException {
         if (flushException != null) {
-            System.out.println(flushException);
             throw new IOException("Failed to flush records to MongoDB", flushException);
         }
     }
@@ -198,7 +213,7 @@ public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, Documen
             }
         }
 
-         private void backoff() {
+        private void backoff() {
             try {
                 Thread.sleep(backoffMillis);
             } catch (InterruptedException e) {
@@ -210,5 +225,4 @@ public class MongoBulkWriter<IN> implements SinkWriter<IN, DocumentBulk, Documen
             currentRetries = 0L;
         }
     }
-
 }

@@ -8,16 +8,16 @@ public class influx_test {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().setParallelism(1);
 
         InfluxDBSink<QPSs> influxDBSink = InfluxDBSink.builder()
-                .setInfluxDBSchemaSerializer(new QPSInfluxSerializer())
-                .setInfluxDBUrl("http://192.168.1.160:8086")           // http://localhost:8086
-                .setInfluxDBUsername("k8s") // admin
+        .setInfluxDBSchemaSerializer(new QPSInfluxSerializer())
+        .setInfluxDBUrl("http://192.168.1.160:8086")           // http://localhost:8086
+        .setInfluxDBUsername("k8s") // admin
 //                CREATE USER k8s with PASSWORD 'k8s123'
-                .setInfluxDBPassword("k8s123") // admin
-                .setInfluxDBBucket("test")     // default
+        .setInfluxDBPassword("k8s123") // admin
+        .setInfluxDBBucket("jaeger")     // default
                 .setWriteBufferSize(20)
-                .setInfluxDBOrganization("influxdata")  // influxdata
+        .setInfluxDBOrganization("influxdata")  // influxdata
                 .setInfluxDBVersion(1)
-                .build();
+        .build();
 
         DataStreamSource<QPSs> dataStreamSource = env.addSource(new MyQPSSource());
         dataStreamSource.sinkTo(influxDBSink);

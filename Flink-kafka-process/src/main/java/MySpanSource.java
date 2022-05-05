@@ -17,10 +17,10 @@ public class MySpanSource implements SourceFunction<Spans> {
 //                new Spans("http","0",100,1003L),
 //                new Spans("http","0",100,1004L)
         examples.add(new Spans("http","0",100,1000L));
-        examples.add(new Spans("http","1",100,1001L));
-        examples.add(new Spans("http","2",100,1002L));
-        examples.add(new Spans("http","3",100,1003L));
-        examples.add(new Spans("http","4",100,1004L));
+        examples.add(new Spans("http","0",100,1001L));
+        examples.add(new Spans("http","0",100,1002L));
+        examples.add(new Spans("http","0",100,1003L));
+        examples.add(new Spans("http","0",100,1004L));
         int lens = examples.size();
         long basetime = examples.get(0).getTimestamp();
         while (isRunning){

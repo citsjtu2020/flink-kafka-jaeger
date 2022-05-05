@@ -15,7 +15,7 @@ public class ParamConfig {
         // 6: influx data sink pwd
     private String influx_pwd;
         // 7: influx data sink database
-    private String influx_database;
+    private String influx_dadtabase;
         // 8: influx data sink organization
     private String influx_organization;
         // 9: influx data buffer size
@@ -38,25 +38,28 @@ public class ParamConfig {
     private int mongo_port;
         // 18: mongo database
     private String mongo_database;
-        // 19: mongo collection
-    private String mongo_collection;
+        // 19: mongo collection for spans
+    private String mongo_collection_span;
+        //20: mongo collection for service
+    private String mongo_collection_service;
 
     public ParamConfig(){
-        this.kafka_ip = "my-cluster-kafka-brokers.kafka";
+        this.kafka_ip = "192.168.1.18";
         // 1: kafka data source port
         this.kafka_port = 9092;
         // 2: kafka data topic
-        this.kafka_topic = "jaeger-spans";
+//        --kafka.topic=jaeger-span
+        this.kafka_topic = "jaeger-span";
         // 3:influx data sink ip
         this.influx_ip = "192.168.1.160";
         // 4:influx data sink port
         this.influx_port = 8086;
         // 5: influx data sink user
-        this.influx_user = "k8s";
+        this.influx_user = "admin";
         // 6: influx data sink pwd
-        this.influx_pwd = "k8s123";
+        this.influx_pwd = "admin123";
         // 7: influx data sink database
-        this.influx_database = "jaeger";
+        this.influx_dadtabase = "jaeger";
         // 8: influx data sink organization
         this.influx_organization = "influxdata";
         // 9: influx data buffer size
@@ -66,21 +69,24 @@ public class ParamConfig {
         // 11: mongo FLUSH_ON_CHECKPOINT
         this.mongo_flush_checkpoint = "false";
         // 12: mongo FLUSH_SIZE
-        this.mongo_flush_size = 1_000;
+//        1_000
+        this.mongo_flush_size = 10;
     //  13: mongo_flush_interval
-        this.mongo_flush_interval = 10_000L;
+//        10_000
+        this.mongo_flush_interval = 30_000L;
         // 14: mongo user
-        this.mongo_user = "flinkadmin";
+        this.mongo_user = "jaeger";
         // 15: mongo pwd
-        this.mongo_pwd = "flink";
+        this.mongo_pwd = "jaeger123";
         // 16: mongo ip
-        this.mongo_ip = "192.168.1.160";
+        this.mongo_ip = "192.168.1.18";
         // 17: mongo port
         this.mongo_port = 27017;
         // 18: mongo database
-        this.mongo_database = "mydb";
+        this.mongo_database = "jaeger";
         // 19: mongo collection
-        this.mongo_collection = "mycollection";
+        this.mongo_collection_span = "span";
+        this.mongo_collection_service = "service";
     }
 
     public int getInflux_port() {
@@ -108,7 +114,7 @@ public class ParamConfig {
     }
 
     public String getInflux_dadtabase() {
-        return this.influx_database;
+        return this.influx_dadtabase;
     }
 
     public String getKafka_ip() {
@@ -136,7 +142,7 @@ public class ParamConfig {
     }
 
     public String getMongo_collection() {
-        return this.mongo_collection;
+        return this.mongo_collection_span;
     }
 
     public String getMongo_database() {
@@ -164,7 +170,7 @@ public class ParamConfig {
     }
 
     public void setInflux_dadtabase(String influx_dadtabase) {
-        this.influx_database = influx_dadtabase;
+        this.influx_dadtabase = influx_dadtabase;
     }
 
     public void setInflux_buffer(int influx_buffer) {
@@ -204,7 +210,7 @@ public class ParamConfig {
     }
 
     public void setMongo_collection(String mongo_collection) {
-        this.mongo_collection = mongo_collection;
+        this.mongo_collection_span = mongo_collection;
     }
 
     public void setMongo_database(String mongo_database) {
@@ -241,5 +247,48 @@ public class ParamConfig {
 
     public void setMongo_user(String mongo_user) {
         this.mongo_user = mongo_user;
+    }
+
+    public void setMongo_collection_span(String mongo_collection_span) {
+        this.mongo_collection_span = mongo_collection_span;
+    }
+
+    public void setMongo_collection_service(String mongo_collection_service) {
+        this.mongo_collection_service = mongo_collection_service;
+    }
+
+    public String getMongo_collection_span() {
+        return this.mongo_collection_span;
+    }
+
+    public String getMongo_collection_service() {
+        return this.mongo_collection_service;
+    }
+
+    @Override
+    public String toString() {
+        return "ParamConfig{" +
+                "kafka_ip='" + kafka_ip + '\'' +
+                ", kafka_port=" + kafka_port +
+                ", kafka_topic='" + kafka_topic + '\'' +
+                ", influx_ip='" + influx_ip + '\'' +
+                ", influx_port=" + influx_port +
+                ", influx_user='" + influx_user + '\'' +
+                ", influx_pwd='" + influx_pwd + '\'' +
+                ", influx_dadtabase='" + influx_dadtabase + '\'' +
+                ", influx_organization='" + influx_organization + '\'' +
+                ", influx_buffer=" + influx_buffer +
+                ", mongo_trans_enable='" + mongo_trans_enable + '\'' +
+                ", mongo_flush_checkpoint='" + mongo_flush_checkpoint + '\'' +
+                ", mongo_flush_size=" + mongo_flush_size +
+                ", mongo_flush_interval=" + mongo_flush_interval +
+                ", mongo_user='" + mongo_user + '\'' +
+                ", mongo_pwd='" + mongo_pwd + '\'' +
+                ", mongo_ip='" + mongo_ip + '\'' +
+                ", mongo_port=" + mongo_port +
+                ", mongo_database='" + mongo_database + '\'' +
+                ", mongo_collection_span='" + mongo_collection_span + '\'' +
+                ", mongo_collection_service='" + mongo_collection_service + '\'' +
+                '}';
     }
 }

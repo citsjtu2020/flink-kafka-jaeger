@@ -139,7 +139,7 @@ public class MyKafkaConsumer {
         MongoSink<Spans> mongoSink = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), paramConfig.getMongo_collection(),
                                new SpansDocumentSerializer(), mongoproperties);
 //        dataStreamSource.sinkTo();
-
+////`mongodb://[username:password@]host1[:port1][,host2[:port2],…[,hostN[:portN]]][/[database][?options]]
         Properties properties = new Properties();
 //        "10.100.233.199:9092"
 //        properties.setProperty("bootstrap.servers",kafkaserver);
