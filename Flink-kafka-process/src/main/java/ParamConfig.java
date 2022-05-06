@@ -42,6 +42,8 @@ public class ParamConfig {
     private String mongo_collection_span;
         //20: mongo collection for service
     private String mongo_collection_service;
+//
+    private String influx_measure;
 
     public ParamConfig(){
         this.kafka_ip = "192.168.1.18";
@@ -51,7 +53,7 @@ public class ParamConfig {
 //        --kafka.topic=jaeger-span
         this.kafka_topic = "jaeger-span";
         // 3:influx data sink ip
-        this.influx_ip = "192.168.1.160";
+        this.influx_ip = "192.168.1.18";
         // 4:influx data sink port
         this.influx_port = 8086;
         // 5: influx data sink user
@@ -87,6 +89,7 @@ public class ParamConfig {
         // 19: mongo collection
         this.mongo_collection_span = "span";
         this.mongo_collection_service = "service";
+        this.influx_measure = "pod";
     }
 
     public int getInflux_port() {
@@ -265,6 +268,14 @@ public class ParamConfig {
         return this.mongo_collection_service;
     }
 
+    public String getInflux_measure() {
+        return this.influx_measure;
+    }
+
+    public void setInflux_measure(String influx_measure) {
+        this.influx_measure = influx_measure;
+    }
+
     @Override
     public String toString() {
         return "ParamConfig{" +
@@ -289,6 +300,7 @@ public class ParamConfig {
                 ", mongo_database='" + mongo_database + '\'' +
                 ", mongo_collection_span='" + mongo_collection_span + '\'' +
                 ", mongo_collection_service='" + mongo_collection_service + '\'' +
+                ", influx_measure='" + influx_measure + '\'' +
                 '}';
     }
 }

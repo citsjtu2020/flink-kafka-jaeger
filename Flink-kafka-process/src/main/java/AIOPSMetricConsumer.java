@@ -107,7 +107,7 @@ public class AIOPSMetricConsumer {
         }
          // 20: influx data sink organization
         if (extract_args.containsKey("influx.measure".trim())){
-            paramConfig.setInflux_organization(extract_args.get("influx.measure"));
+            paramConfig.setInflux_measure(extract_args.get("influx.measure"));
         }
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 //        {"log_id":"zIy5pX8B2wYFm91x6xZf","timestamp":"1650517696","cmdb_id":"frontend-0",
