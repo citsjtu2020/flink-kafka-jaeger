@@ -46,12 +46,17 @@ public class ParamConfig {
     private String influx_measure;
 
     public ParamConfig(){
-        this.kafka_ip = "192.168.1.18";
+        // for debug
+        // this.kafka_ip = "localhost:31092, localhost:31093, localhost:31094";
+        this.kafka_ip = "kafka-cs.kafka.svc.cluster.local";
+        // this.kafka_ip = "kafka-0.kafka-hs.kafka.svc.cluster.local:9092,kafka-1.kafka-hs.kafka.svc.cluster.local:9092,kafka-2.kafka-hs.kafka.svc.cluster.local:9092";
         // 1: kafka data source port
         this.kafka_port = 9092;
         // 2: kafka data topic
 //        --kafka.topic=jaeger-span
-        this.kafka_topic = "jaeger-span";
+        // this.kafka_topic = "jaeger-span";
+        // this.kafka_topic = "log-1c9e9efe6847bc4723abd3640527cbe9";
+        this.kafka_topic = "jaeger-spans";
         // 3:influx data sink ip
         this.influx_ip = "192.168.1.18";
         // 4:influx data sink port
@@ -89,7 +94,7 @@ public class ParamConfig {
         // 19: mongo collection
         this.mongo_collection_span = "span";
         this.mongo_collection_service = "service";
-        this.influx_measure = "pod";
+        this.influx_measure = "service_call";
     }
 
     public int getInflux_port() {

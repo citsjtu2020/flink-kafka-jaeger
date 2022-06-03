@@ -1,4 +1,4 @@
-import connectors.mongo.serde.DocumentSerializer;
+import connectors.mongo2.serde.DocumentSerializer;
 import org.bson.Document;
 
 public class SpansDocumentSerializer implements DocumentSerializer<Spans> {

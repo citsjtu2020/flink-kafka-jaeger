@@ -23,7 +23,7 @@ public class AIOPSKafkaProducer {
 //        "10.100.233.199:9092"
 //        System.out.println(kafkaserver);
 //        System.out.println(topic);
-        properties.setProperty("bootstrap.servers","192.168.1.18:9092");
+        properties.setProperty("bootstrap.servers","192.168.1.18:9093,192.168.1.18:9094");
         System.out.println("start the proceducer");
         FlinkKafkaProducer<String> producer = new FlinkKafkaProducer("jaeger-span",new SimpleStringSchema(),properties);
         producer.setWriteTimestampToKafka(true);

@@ -62,7 +62,7 @@ public class AIOPSSource implements SourceFunction<String> {
 //        "operation_name":"hipstershop.CurrencyService/Convert",
 //        "parent_span":"1ae5793e9e0bbf71"}
 //        SourceLisst = toArrayByInputStreamReader1(哦名data0421_01.txt");
-        SourceLisst = toArrayByInputStreamReader1("/home/huaqin/data0421_01.txt");
+        SourceLisst = toArrayByInputStreamReader1("/home/k8smaster/data0421_01.txt");
         int lens = SourceLisst.size();
         long basetime = Long.parseLong(SourceLisst.get(0).get("timestamp").toString());
         long mintime = Long.parseLong(SourceLisst.get(0).get("timestamp").toString());
@@ -76,7 +76,7 @@ public class AIOPSSource implements SourceFunction<String> {
             if (count % 300 == 0){
                 System.out.println(c);
             }
-            System.out.println(count);
+            // System.out.println(count);
 
             long tmp_timestamp = Long.parseLong(c.get("timestamp").toString());
             tmp_timestamp = nowtime + (tmp_timestamp - basetime);

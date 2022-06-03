@@ -143,7 +143,8 @@ public class AIOPSLogComsumer {
         Properties properties = new Properties();
 //        "10.100.233.199:9092"
 //        properties.setProperty("bootstrap.servers",kafkaserver);
-        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
+        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip());
+        properties.setProperty("enable.auto.commit", false);
         System.out.println("start the consumer");
 
         FlinkKafkaConsumer<ObjectNode> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(),new JSONKeyValueDeserializationSchema(true),properties);
@@ -171,6 +172,7 @@ public class AIOPSLogComsumer {
                     logout.setName(name);
                     logout.setValue(valuevar);
 //                logout.setValue();
+                    System.out.println("Log out:" + logout.toString());
                     out.collect(logout);
                 }
             }

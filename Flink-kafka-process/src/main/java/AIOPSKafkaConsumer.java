@@ -17,12 +17,16 @@ import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrderness
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema;
+import org.apache.flink.table.plan.nodes.datastream.DataStreamTemporalJoinToCoProcessTranslator.TemporalJoinConditionExtractor;
 import org.apache.flink.util.Collector;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 public class AIOPSKafkaConsumer {
      public static void main(String[] args) throws Exception {
@@ -118,7 +122,7 @@ public class AIOPSKafkaConsumer {
           if (extract_args.containsKey("mongo.collection.service".trim())){
             paramConfig.setMongo_collection_service(extract_args.get("mongo.collection.service"));
         }
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().setParallelism(1);
         System.out.println(paramConfig);
          Properties mongoproperties = new Properties();
          mongoproperties.setProperty(MongoOptions.SINK_TRANSACTION_ENABLED, paramConfig.getMongo_trans_enable());
@@ -150,12 +154,13 @@ public class AIOPSKafkaConsumer {
                                new AIOPSGraphSpanDocumentSerializer(), mongoproperties);
          MongoSink<QPSs> mongoSink_service_pod = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), service_pod,
                                new QPSsDocumentSerializer(), mongoproperties);
+        
 //        dataStreamSource.sinkTo();
 ////`mongodb://[username:password@]host1[:port1][,host2[:port2],…[,hostN[:portN]]][/[database][?options]]
         Properties properties = new Properties();
 //        "10.100.233.199:9092"
 //        properties.setProperty("bootstrap.servers",kafkaserver);
-        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
+        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip());
 
         System.out.println("start the consumer");
 
@@ -181,25 +186,40 @@ public class AIOPSKafkaConsumer {
                     @Override
                     public void processElement(ObjectNode value, Context ctx, Collector<Tuple9<String,String,String,String,Long,Long,String,String,String>> out) throws Exception {
 //                        System.out.println(value);
-                        if (value.get("value").has("span_id")){
-                            String tid = value.get("value").get("trace_id").asText().trim();
-                            String sid = value.get("value").get("span_id").asText().trim();
-                            long dur = value.get("value").get("duration").asLong();
+                        String str = value.get("value").toString().trim();
+                        str = str.substring(1, str.length() - 1).replace("\\", "").trim();
+                        System.out.println(str);
+                        JSONObject tmpjson = JSON.parseObject(str);
+                        Iterator<String> it = tmpjson.keySet().iterator();
+                        while(it.hasNext()){
+                            System.out.print(it.next()+",");
+                        }
+                        System.out.println("");
+                        if (tmpjson.containsKey("span_id")){
+                            String tid = tmpjson.getString("trace_id").trim();
+                            String sid = tmpjson.getString("span_id").trim();
+                            long dur = tmpjson.getLong("duration");
 //                          JsonNode process = value.get("value").get("process");
-                            String pod = value.get("value").get("cmdb_id").asText().trim();
+                            String pod = tmpjson.getString("cmdb_id").trim();
                             String service = pod.split("-")[0].trim();
 //                          String endpoint = "";
-                            String protocol = value.get("value").get("type").asText().trim();
+                            try{
+                               int tmppid = Integer.parseInt(service.substring(service.length()-1));
+                               service = service.substring(0,service.length()-1);
+                            }catch (Exception e0){
+                                service = service;
+                            }
+                            String protocol = tmpjson.getString("type").trim();
 //                component
 
-                            long starttime = value.get("value").get("timestamp").asLong();
-                            String operation = value.get("value").get("operation_name").asText().trim();
+                            long starttime = tmpjson.getLong("timestamp");
+                            String operation = tmpjson.getString("operation_name").trim();
                             String refer = "0";
                             boolean childs = false;
                             String outapi = "";
 //                          "parent_span"
-                            if (value.get("value").has("parent_span")){
-                                String tmps = value.get("value").get("parent_span").asText().trim();
+                            if (tmpjson.containsKey("parent_span")){
+                                String tmps = tmpjson.getString("parent_span").trim();
                                 if (tmps==null||tmps.length()<= 0){
                                     refer = "client";
                                     childs = false;
@@ -229,15 +249,15 @@ public class AIOPSKafkaConsumer {
 //Tuple10<String,Double,Double,Double,Double,Double,Double,Double,Long,Long>
         DataStream<QPSs> out1 = source1
                 .keyBy(t->t.f3)
-                .timeWindow(Time.milliseconds(60*1000)).process(new AIOPSTraceProcessWindowFunction());
+                .timeWindow(Time.milliseconds(30*1000)).process(new AIOPSTraceProcessWindowFunction());
 
          DataStream<QPSs> podout1 = source1
                 .keyBy(t->t.f7)
-                .timeWindow(Time.milliseconds(60*1000)).process(new AIOPSPodTraceProcessWindowFunction());
+                .timeWindow(Time.milliseconds(30*1000)).process(new AIOPSPodTraceProcessWindowFunction());
 
-        DataStream<AIOPSSpans> out2 = source1.keyBy(t->t.f0).timeWindow(Time.milliseconds(60*1000)).process(new AIOPSGraphProcessWindowFunction());
+        DataStream<AIOPSSpans> out2 = source1.keyBy(t->t.f0).timeWindow(Time.milliseconds(30*1000)).process(new AIOPSGraphProcessWindowFunction());
 //       阿他
-        DataStream<AIOPSSpans> podout2 = source1.keyBy(t->t.f0).timeWindow(Time.milliseconds(60*1000)).process(new AIOPSGraphProcessWindowFunction(true));
+        DataStream<AIOPSSpans> podout2 = source1.keyBy(t->t.f0).timeWindow(Time.milliseconds(30*1000)).process(new AIOPSGraphProcessWindowFunction(true));
         DataStream<AIOPSGraphSpan> out3 = out2.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<AIOPSSpans>(Time.milliseconds(1000)) {
             @Override
             public long extractTimestamp(AIOPSSpans spans) {
@@ -249,7 +269,7 @@ public class AIOPSKafkaConsumer {
 //                return null;
                 return (spans.parent.trim()+";"+spans.api.trim()).trim()+";"+spans.parent_type.trim();
             }
-        }).timeWindow(Time.milliseconds(60*1000)).process(new AIOPSGraphAggProcessWindowFunction());
+        }).timeWindow(Time.milliseconds(30*1000)).process(new AIOPSGraphAggProcessWindowFunction());
 
         DataStream<AIOPSGraphSpan> podout3 = podout2.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<AIOPSSpans>(Time.milliseconds(1000)) {
             @Override
@@ -262,7 +282,7 @@ public class AIOPSKafkaConsumer {
 //                return null;
                 return (spans.parent.trim()+";"+spans.api.trim()).trim()+";"+spans.parent_type.trim();
             }
-        }).timeWindow(Time.milliseconds(60*1000)).process(new AIOPSGraphAggProcessWindowFunction());
+        }).timeWindow(Time.milliseconds(30*1000)).process(new AIOPSGraphAggProcessWindowFunction());
 
         out1.sinkTo(mongoSink_service_svc);
         out3.sinkTo(mongoSink_span_svc);

@@ -1,6 +1,6 @@
 import connectors.influxdb2.sink.InfluxDBSink;
-import connectors.mongo.config.MongoOptions;
-import connectors.mongo.sink.MongoSink;
+import connectors.mongo2.config.MongoOptions;
+import connectors.mongo2.sink.MongoSink;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple9;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +17,8 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema;
 import org.apache.flink.util.Collector;
+
+import com.typesafe.sslconfig.util.PrintlnLogger;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -136,8 +138,8 @@ public class MyKafkaConsumer {
         mongoproperties.setProperty(MongoOptions.SINK_FLUSH_SIZE, String.valueOf(paramConfig.getMongo_flush_size()));
         mongoproperties.setProperty(MongoOptions.SINK_FLUSH_INTERVAL, String.valueOf(paramConfig.getMongo_flush_interval()));
 //        DataStreamSource<Spans> dataStreamSource = env.addSource(new MySpanSource() );
-        MongoSink<Spans> mongoSink = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), paramConfig.getMongo_collection(),
-                               new SpansDocumentSerializer(), mongoproperties);
+        MongoSink<Spans> mongoSink = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), "service_span",
+        new SpansDocumentSerializer(), mongoproperties);
 //        dataStreamSource.sinkTo();
 ////`mongodb://[username:password@]host1[:port1][,host2[:port2],…[,hostN[:portN]]][/[database][?options]]
         Properties properties = new Properties();
@@ -145,7 +147,7 @@ public class MyKafkaConsumer {
 //        properties.setProperty("bootstrap.servers",kafkaserver);
         properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
         System.out.println("start the consumer");
-
+        System.out.println("bootstap_servers: " + paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
         FlinkKafkaConsumer<ObjectNode> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(),new JSONKeyValueDeserializationSchema(true),properties);
         consumer.setStartFromGroupOffsets();
         DataStream<ObjectNode> streamSource = env.addSource(consumer);
@@ -156,6 +158,7 @@ public class MyKafkaConsumer {
         streamSource.process(new ProcessFunction<ObjectNode, Tuple9<String,String,String,String,Long,Long,String,String,String>>() {
             @Override
             public void processElement(ObjectNode value, Context ctx, Collector<Tuple9<String,String,String,String,Long,Long,String,String,String>> out) throws Exception {
+                System.out.println("start process");
                 String tid = value.get("value").get("traceID").asText().trim();
                 String sid = value.get("value").get("spanID").asText().trim();
                 long dur = value.get("value").get("duration").asLong();
@@ -164,6 +167,7 @@ public class MyKafkaConsumer {
                 String pod = "";
                 String endpoint = "";
                 String protocol = "";
+                System.out.println("init success in processElement");
 //                component
                 if (process.has("tags")) {
                     JsonNode tags = process.get("tags");

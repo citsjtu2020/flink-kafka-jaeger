@@ -1,4 +1,6 @@
 import connectors.influxdb2.sink.InfluxDBSink;
+
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -9,7 +11,12 @@ import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserialization
 import org.apache.flink.util.Collector;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Map.Entry;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 public class AIOPSMetricConsumer {
     public static void main(String[] args) throws Exception {
@@ -138,7 +145,7 @@ public class AIOPSMetricConsumer {
         Properties properties = new Properties();
 //        "10.100.233.199:9092"
 //        properties.setProperty("bootstrap.servers",kafkaserver);
-        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
+        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip());
         System.out.println("start the consumer");
 
         FlinkKafkaConsumer<ObjectNode> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(),new JSONKeyValueDeserializationSchema(true),properties);
@@ -152,22 +159,56 @@ public class AIOPSMetricConsumer {
             @Override
             public void processElement(ObjectNode value, Context ctx, Collector<Metrics> out) throws Exception {
 //{"timestamp":"1650517680","cmdb_id":"adservice.ts:8088","kpi_name":"jvm_memory_MB_init.heap","value":"10.0"}
-               if (value.get("value").has("kpi_name")){
-                    String name = value.get("value").get("kpi_name").asText().trim();
-
-                String pod = value.get("value").get("cmdb_id").asText().trim();
+            //    if (value.get("value").has("kpi_name")){
+                String name = "";
+                String pod = "";
+                long starttime = 0;
+                double valuevar = 0.;
+                // Iterator<String> itvalue = value.fieldNames();
+                // while(itvalue.hasNext()){
+                //     System.out.print(itvalue.next() + ",");
+                // }
+                // System.out.println(value.get("value").toString());
+                String str = value.get("value").toString().trim();
+                str = str.substring(1, str.length() - 1).replace("\\", "").trim();
+                System.out.println(str);
+                JSONObject tmpjson = JSON.parseObject(str);
+                Iterator<String> it = tmpjson.keySet().iterator();
+                while(it.hasNext()){
+                    System.out.println(it.next());
+                }
+                
+                try{
+                    name = tmpjson.getString("kpi_name".trim());
+                }catch(Exception e){
+                    System.out.println("out1");
+                }
+                try{
+                    pod = tmpjson.getString("cmdb_id").trim();
+                }catch(Exception e){
+                    System.out.println("out2");
+                }
 //                component
-                long starttime = value.get("value").get("timestamp").asLong();
-//
-                double valuevar = value.get("value").get("value").asDouble();
+                try{
+                    starttime = tmpjson.getLong("timestamp");
+                }catch(Exception e){
+                    System.out.println("out3");
+                }
+                try{
+                    valuevar = tmpjson.getDouble("value");
+                }catch(Exception e){
+                    System.out.println("out4");
+                }
                 Metrics logout = new Metrics();
                 logout.setApi(pod);
                 logout.setTimestamp(starttime);
                 logout.setName(name);
                 logout.setValue(valuevar);
+                System.out.println("Log out:" + logout.toString());
 //                logout.setValue();
                 out.collect(logout);
-               }
+                
+            //    }
 
             }
         }
