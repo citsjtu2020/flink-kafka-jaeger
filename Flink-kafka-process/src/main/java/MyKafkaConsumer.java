@@ -17,11 +17,16 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema;
 import org.apache.flink.util.Collector;
+import io.jaegertracing.api_v2.Model;
+import model.ProtoUnmarshaler;
+import model.Spanraw;
+import model.Traceraw;
 
 import com.typesafe.sslconfig.util.PrintlnLogger;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Properties;
 
 public class MyKafkaConsumer {
@@ -138,86 +143,114 @@ public class MyKafkaConsumer {
         mongoproperties.setProperty(MongoOptions.SINK_FLUSH_SIZE, String.valueOf(paramConfig.getMongo_flush_size()));
         mongoproperties.setProperty(MongoOptions.SINK_FLUSH_INTERVAL, String.valueOf(paramConfig.getMongo_flush_interval()));
 //        DataStreamSource<Spans> dataStreamSource = env.addSource(new MySpanSource() );
-        MongoSink<Spans> mongoSink = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), "service_span",
-        new SpansDocumentSerializer(), mongoproperties);
+//        Spans
+//        SpansDocumentSerializer()
+        MongoSink<AIOPSGraphSpan> mongoSink = new MongoSink<>("mongodb://"+paramConfig.getMongo_user()+":"+paramConfig.getMongo_pwd()+"@"+paramConfig.getMongo_ip()+":"+paramConfig.getMongo_port(), paramConfig.getMongo_database(), "service_span",
+        new AIOPSGraphSpanDocumentSerializer(), mongoproperties);
+//        AIOPSGraphSpanDocumentSerializer()
 //        dataStreamSource.sinkTo();
 ////`mongodb://[username:password@]host1[:port1][,host2[:port2],…[,hostN[:portN]]][/[database][?options]]
         Properties properties = new Properties();
 //        "10.100.233.199:9092"
 //        properties.setProperty("bootstrap.servers",kafkaserver);
-        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
+//        +":"+paramConfig.getKafka_port()
+        properties.setProperty("bootstrap.servers",paramConfig.getKafka_ip());
         System.out.println("start the consumer");
-        System.out.println("bootstap_servers: " + paramConfig.getKafka_ip()+":"+paramConfig.getKafka_port());
-        FlinkKafkaConsumer<ObjectNode> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(),new JSONKeyValueDeserializationSchema(true),properties);
+//        +":"+paramConfig.getKafka_port()
+        System.out.println("bootstap_servers: " + paramConfig.getKafka_ip());
+//        new JSONKeyValueDeserializationSchema(true)
+//        ObjectNode
+        FlinkKafkaConsumer<Spanraw> consumer = new FlinkKafkaConsumer<>(paramConfig.getKafka_topic(),new ProtoUnmarshaler(),properties);
         consumer.setStartFromGroupOffsets();
-        DataStream<ObjectNode> streamSource = env.addSource(consumer);
+        DataStream<Spanraw> streamSource = env.addSource(consumer);
 //        DataStream<ObjectNode> streamSource = env.addSource(new MySource());
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        DataStream<Tuple9<String,String,String,String,Long,Long,String,String,String>> sourcecsv =
-        streamSource.process(new ProcessFunction<ObjectNode, Tuple9<String,String,String,String,Long,Long,String,String,String>>() {
+        DataStream<Tuple9<String,String,String,String,Long,Double,String,String,String>> sourcecsv =
+        streamSource.process(new ProcessFunction<Spanraw, Tuple9<String,String,String,String,Long,Double,String,String,String>>() {
             @Override
-            public void processElement(ObjectNode value, Context ctx, Collector<Tuple9<String,String,String,String,Long,Long,String,String,String>> out) throws Exception {
-                System.out.println("start process");
-                String tid = value.get("value").get("traceID").asText().trim();
-                String sid = value.get("value").get("spanID").asText().trim();
-                long dur = value.get("value").get("duration").asLong();
-                JsonNode process = value.get("value").get("process");
-                String service = process.get("serviceName").asText().trim();
+            public void processElement(Spanraw value, Context ctx, Collector<Tuple9<String,String,String,String,Long,Double,String,String,String>> out) throws Exception {
+//                System.out.println("start process");
+//                value.get("value").get("traceID").asText().trim()
+                String tid = value.getTraceId();
+                String sid = value.getSpanId();
+                double dur = value.getDuration();
+//                JsonNode process = value.get("value").get("process");
+                String service = value.getServiceName();
+//                String service = process.get("serviceName").asText().trim();
                 String pod = "";
                 String endpoint = "";
                 String protocol = "";
-                System.out.println("init success in processElement");
+
+                if (value.getTags().size() > 0){
+//                    ListIterator<>
+                    if (value.containTagItem("hostname")){
+                        pod = value.getTagsItem("hostname");
+                    }
+                    endpoint = value.getTagsItem("ip");
+//                    "component"
+                    protocol = value.getTagsItem("component");
+                }
+//                System.out.println("init success in processElement");
 //                component
-                if (process.has("tags")) {
-                    JsonNode tags = process.get("tags");
-                    for (Iterator<JsonNode> elements = tags.elements(); elements.hasNext();){
-                        JsonNode next = elements.next();
-                        String aim = next.get("key").asText().trim();
-                        if (aim.trim().equals("hostname")){
-//                    System.out.println(jtag);
-                            pod = next.get("value").asText();
-//                    break;
-                        }
-                        if (aim.trim().equals("ip")){
-                            endpoint = next.get("value").asText();
-                        }
-                        if ((!endpoint.isEmpty()) && (!pod.isEmpty())){
-                            break;
-                        }
-                    }
-                }
-                JsonNode spantags = value.get("value").get("tags");
-                for(Iterator<JsonNode> elements = spantags.elements();elements.hasNext();){
-                    JsonNode next = elements.next();
-                    String aim = next.get("key").asText().trim();
-                    if (aim.trim().equals("component")){
-//                System.out.println(jtag);
-                        protocol = next.get("value").asText().trim();
-                        break;
-                    }
-                }
-                long starttime = value.get("value").get("startTimeMillis").asLong();
-                String operation = value.get("value").get("operationName").asText().trim();
+//                if (process.has("tags")) {
+//                    JsonNode tags = process.get("tags");
+//                    for (Iterator<JsonNode> elements = tags.elements(); elements.hasNext();){
+//                        JsonNodpe next = elements.next();
+//                        String aim = next.get("key").asText().trim();
+//                        if (aim.trim().equals("hostname")){
+////                    System.out.println(jtag);
+//                            pod = next.get("value").asText();
+////                    break;
+//                        }
+//                        if (aim.trim().equals("ip")){
+//                            endpoint = next.get("value").asText();
+//                        }
+//                        if ((!endpoint.isEmpty()) && (!pod.isEmpty())){
+//                            break;
+//                        }
+//                    }
+//                }
+//                JsonNode spantags = value.get("value").get("tags");
+//                for(Iterator<JsonNode> elements = spantags.elements();elements.hasNext();){
+//                    JsonNode next = elements.next();
+//                    String aim = next.get("key").asText().trim();
+//                    if (aim.trim().equals("component")){
+////                System.out.println(jtag);
+//                        protocol = next.get("value").asText().trim();
+//                        break;
+//                    }
+//                }
+//                get("value").get("startTimeMillis").asLong()
+                long starttime = value.getStartTimeMillis();
+//                get("value").get("operationName").asText().trim()
+                String operation = value.getOperationName();
                 String refer = "0";
                 boolean childs = false;
                 String outapi = "";
-//                object.getJSONArray("references").isEmpty()== false
-                if (value.get("value").get("references").isEmpty() == false){
-//                    value.get("value").get("references").
-                    refer = value.get("value").get("references").get(0).get("spanID").asText().trim();
+                if (!value.getParentId().equals("")){
                     childs = true;
+                    refer = value.getParentId();
+                }else{
+                    refer = "client";
                 }
+//                object.getJSONArray("references").isEmpty()== false
+//                if (value.get("value").get("references").isEmpty() == false){
+////                    value.get("value").get("references").
+//                    refer = value.get("value").get("references").get(0).get("spanID").asText().trim();
+//                    childs = true;
+//                }
               if(!(service.equals("simple-streaming.jaeger")) && !(service.contains("jaeger"))&& !(service.contains("simple-streaming"))){
                     operation = operation.replace('/','-');
                     if (operation.charAt(0) != '-'){
                         operation = "-"+operation.trim();
                     }
-                    if (!childs){
-                        outapi = "http".trim();
-                    }else{
-                        outapi = service.trim()+operation;
-                    }
+//                    if (!childs){
+//                        outapi = "http".trim();
+//                    }else{
+//                        outapi = service.trim()+operation;
+//                    }
+                  outapi = service.trim()+operation;
 //                System.out.println("trace: "+tid);
 //                System.out.println("span: "+sid);
 //                System.out.println("duration: "+dur);
@@ -230,9 +263,9 @@ public class MyKafkaConsumer {
         }
 
         );
-        SingleOutputStreamOperator<Tuple9<String, String, String, String, Long, Long, String, String, String>> source1 =  sourcecsv.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Tuple9<String, String, String, String, Long, Long, String, String, String>>(Time.milliseconds(1000)) {
+        SingleOutputStreamOperator<Tuple9<String, String, String, String, Long, Double, String, String, String>> source1 =  sourcecsv.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Tuple9<String, String, String, String, Long, Double, String, String, String>>(Time.milliseconds(1000)) {
             @Override
-            public long extractTimestamp(Tuple9<String, String, String, String, Long, Long, String, String, String> trace) {
+            public long extractTimestamp(Tuple9<String, String, String, String, Long, Double, String, String, String> trace) {
                 return trace.f4;
             }
         });
@@ -243,7 +276,7 @@ public class MyKafkaConsumer {
 
 
         DataStream<Spans> out2 = source1.keyBy(t->t.f0).timeWindow(Time.milliseconds(30*1000)).process(new GraphProcessWindowFunction());
-        DataStream<Spans> out3 = out2.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Spans>(Time.milliseconds(1000)) {
+        DataStream<AIOPSGraphSpan> out3 = out2.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Spans>(Time.milliseconds(1000)) {
             @Override
             public long extractTimestamp(Spans spans) {
                 return spans.timestamp;
@@ -252,7 +285,8 @@ public class MyKafkaConsumer {
             @Override
             public String getKey(Spans spans) throws Exception {
 //                return null;
-                return (spans.parent.trim()+";"+spans.api.trim()).trim();
+//                return (spans.parent.trim()+";"+spans.api.trim()).trim();
+                return (spans.parent.trim()+";"+spans.api.trim()).trim()+";"+spans.parent_type.trim();
             }
         }).timeWindow(Time.milliseconds(60*1000)).process(new GraphAggProcessWindowFunction());
         out1.sinkTo(influxDBSink);

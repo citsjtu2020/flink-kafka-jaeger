@@ -9,13 +9,13 @@ import java.util.Collections;
 
 //min average
 
-public class TraceProcessWindowFunction extends ProcessWindowFunction<Tuple9<String, String, String, String, Long, Long, String, String, String>,QPSs,String, TimeWindow> {
+public class TraceProcessWindowFunction extends ProcessWindowFunction<Tuple9<String, String, String, String, Long, Double, String, String, String>,QPSs,String, TimeWindow> {
     @Override
-    public void process(String s, ProcessWindowFunction<Tuple9<String, String, String, String, Long, Long, String, String, String>, QPSs, String, TimeWindow>.Context context, Iterable<Tuple9<String, String, String, String, Long, Long, String, String, String>> iterable, Collector<QPSs> collector) throws Exception {
+    public void process(String s, ProcessWindowFunction<Tuple9<String, String, String, String, Long, Double, String, String, String>, QPSs, String, TimeWindow>.Context context, Iterable<Tuple9<String, String, String, String, Long, Double, String, String, String>> iterable, Collector<QPSs> collector) throws Exception {
         long count = 0;
         double mean = 0.0;
-        ArrayList<Long> DurList = new ArrayList<>();
-        for(Tuple9<String, String, String, String, Long, Long, String, String, String> in : iterable){
+        ArrayList<Double> DurList = new ArrayList<>();
+        for(Tuple9<String, String, String, String, Long, Double, String, String, String> in : iterable){
             DurList.add(in.f5);
             count++;
             mean += in.f5;
@@ -23,7 +23,7 @@ public class TraceProcessWindowFunction extends ProcessWindowFunction<Tuple9<Str
         mean = mean / count;
         Collections.sort(DurList);
         double std = 0.0;
-        for (long dur : DurList){
+        for (double dur : DurList){
             std += (dur - mean)*(dur-mean);
         }
         std = Math.sqrt(std);

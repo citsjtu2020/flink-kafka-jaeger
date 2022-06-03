@@ -17,7 +17,7 @@ import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrderness
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema;
-import org.apache.flink.table.plan.nodes.datastream.DataStreamTemporalJoinToCoProcessTranslator.TemporalJoinConditionExtractor;
+//import org.apache.flink.table.plan.nodes.datastream.DataStreamTemporalJoinToCoProcessTranslator.TemporalJoinConditionExtractor;
 import org.apache.flink.util.Collector;
 
 import java.util.HashMap;

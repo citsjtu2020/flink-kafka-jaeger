@@ -48,8 +48,8 @@ public class ParamConfig {
     public ParamConfig(){
         // for debug
         // this.kafka_ip = "localhost:31092, localhost:31093, localhost:31094";
-        this.kafka_ip = "kafka-cs.kafka.svc.cluster.local";
-        // this.kafka_ip = "kafka-0.kafka-hs.kafka.svc.cluster.local:9092,kafka-1.kafka-hs.kafka.svc.cluster.local:9092,kafka-2.kafka-hs.kafka.svc.cluster.local:9092";
+//        this.kafka_ip = "kafka-cs.kafka.svc.cluster.local";
+         this.kafka_ip = "kafka-0.kafka-hs.kafka.svc.cluster.local:9092,kafka-1.kafka-hs.kafka.svc.cluster.local:9092,kafka-2.kafka-hs.kafka.svc.cluster.local:9092";
         // 1: kafka data source port
         this.kafka_port = 9092;
         // 2: kafka data topic

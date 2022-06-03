@@ -31,6 +31,9 @@ public class AIOPSGraphProcessWindowFunction extends ProcessWindowFunction<Tuple
             SidToApi.put(i.f1.trim(),new AIOPSSpans(outapi,i.f2.trim(),0,-1,i.f8));
             if (i.f2.trim().equals("client".trim())){
                 AIOPSSpans tmpspan = SidToApi.get(i.f1.trim());
+                if (tmpspan.getParent_type().equals("")){
+                    tmpspan.setParent_type(tmpspan.getProtocol());
+                }
                 if (ApiToCount.containsKey(tmpspan)){
                     ApiToCount.put(tmpspan,ApiToCount.get(SidToApi.get(i.f1.trim()))+1);
                 }else {
