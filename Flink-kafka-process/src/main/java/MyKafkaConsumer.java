@@ -126,7 +126,7 @@ public class MyKafkaConsumer {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         InfluxDBSink<QPSs> influxDBSink = InfluxDBSink.builder()
-        .setInfluxDBSchemaSerializer(new QPSInfluxSerializer())
+        .setInfluxDBSchemaSerializer(new QPSInfluxSerializer(paramConfig.getInflux_measure()))
         .setInfluxDBUrl("http://"+paramConfig.getInflux_ip()+":"+paramConfig.getInflux_port())           // http://localhost:8086
         .setInfluxDBUsername(paramConfig.getInflux_user()) // admin
 //                CREATE USER k8s with PASSWORD 'k8s123'

@@ -47,10 +47,12 @@ public class ProtoUnmarshaler extends AbstractDeserializationSchema<Spanraw> {
 //        span.setStartTimeMillis();
 //        java.util.List<SpanRef> references_
         java.util.List<Model.SpanRef> referlist = protoSpan.getReferencesList();
-        span.setSpanId("");
-
-        if (referlist.size() <= 0 || span.traceId.equals(span.spanId)){
-            span.setSpanId("");
+        span.setParentId("");
+//traceId
+//        span.spanId
+        if (referlist.size() <= 0 || span.getTraceId().equals(span.getSpanId())){
+//            span.setSpanId("");
+            span.setParentId("");
         }else{
             for (Model.SpanRef tmpref : referlist) {
                 //                referlist.get(0).getRefType().equals(Model.SpanRefType.CHILD_OF){
@@ -62,7 +64,8 @@ public class ProtoUnmarshaler extends AbstractDeserializationSchema<Spanraw> {
                     break;
                 }
             }
-            if (span.parentId.equals("")){
+//            span.parentId
+            if (span.getParentId().equals("")){
                 for (Model.SpanRef tmpref : referlist) {
                     //                referlist.get(0).getRefType().equals(Model.SpanRefType.CHILD_OF){
 //

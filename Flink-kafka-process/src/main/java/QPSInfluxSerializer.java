@@ -6,10 +6,18 @@ import org.apache.flink.api.connector.sink.SinkWriter;
 import java.io.IOException;
 
 public class QPSInfluxSerializer implements InfluxDBSchemaSerializer<QPSs> {
+
+        public String measure;
+        public QPSInfluxSerializer(){
+                this.measure = "qpsofapi";
+        }
+        public QPSInfluxSerializer(String measure){
+                this.measure = measure;
+        }
     @Override
     public Point serialize(QPSs element, SinkWriter.Context context) throws IOException {
 //        return null;
-        final Point dataPoint = new Point("qpsofapi");
+        final Point dataPoint = new Point(this.measure);
 //            public QPSs(String api,double meandur,double mindur,double maxdur,double std,double p50dur,double p95dur,double p99dur,long count,long timestamp){
         dataPoint.addTag("api", String.valueOf(element.getApi().trim()));
         dataPoint.addField("mean", element.getMeandur());
